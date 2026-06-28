@@ -15,18 +15,15 @@ jobs:
         with:
           go-version: '1.23'
 
-      - name: Install fpm
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ruby ruby-dev rubygems
-          sudo gem install fpm --no-document
-
       - name: Build packages
         env:
           VERSION: ${{ github.ref_name }}
         run: |
           VERSION="${VERSION#v}"
-          make
+          echo "Building version ${VERSION}"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          gem install fpm
+          make deb rpm
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
