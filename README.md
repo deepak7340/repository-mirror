@@ -54,6 +54,19 @@ Array variables (e.g. `SECTIONS=(main,universe)`) are supported with comma or wh
 | `microsoft-rpm` | rpm | wget | `/var/cache/packagesign/microsoft/yum` |
 | `rocky` | rpm | wget | `/var/cache/packagesign/yum/rocky` |
 
+## Dependencies
+
+### Runtime
+- `debmirror` — for debmirror-based sync (ubuntu, docker-apt, microsoft-apt)
+- `wget` — for wget-based sync (docker-yum, epel, jenkins, microsoft-rpm, rocky)
+- `rsync` — for rsync-based sync
+- `gnupg` / `gpg` — for GPG keyring management
+
+### Build
+- `go` — to compile the binary
+- `make` — to run build targets
+- `fpm` (ruby gem) — to build .deb / .rpm packages
+
 ## Building
 
 ```bash
