@@ -10,20 +10,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23'
 
-      - name: Build packages
-        env:
-          VERSION: ${{ github.ref_name }}
+      - name: Build and package
         run: |
-          VERSION="${VERSION#v}"
-          echo "Building version ${VERSION}"
-          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
-          sudo gem install fpm --no-document
-          make deb rpm
+          VERSION="${GITHUB_REF_NAME#v}"
+          make build
+
+          mkdir -p dist
+          cp repository_mirror dist/
+
+          # build .deb
+          PKG_ROOT="$(mktemp -d)"
+          mkdir -p "${PKG_ROOT}/usr/local/bin"
+          cp repository_mirror "${PKG_ROOT}/usr/local/bin/"
+          mkdir -p "${PKG_ROOT}/DEBIAN"
+          cat > "${PKG_ROOT}/DEBIAN/control" <<EOF
+Package: repository-mirror
+Version: ${VERSION}
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Deepak Tiwari <deepak@obmondo.com>
+Description: Repository sync tool for apt/rpm mirrors
+EOF
+          dpkg-deb --build "${PKG_ROOT}" "dist/repository-mirror_${VERSION}_amd64.deb"
+
+          # build .rpm via fpm in docker
+          docker run --rm \
+            -v "$PWD:/src" \
+            -e VERSION="${VERSION}" \
+            -w /src \
+            ruby:3.2-slim \
+            sh -c 'gem install fpm --no-document && fpm -s dir -t rpm -n repository-mirror -v "${VERSION}" -a x86_64 --prefix /usr/local/bin --description "Repository sync tool for apt/rpm mirrors" --package dist/ repository_mirror=/usr/local/bin/repository_mirror'
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
