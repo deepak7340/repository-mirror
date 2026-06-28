@@ -1,8 +1,0 @@
-# Repository Mirror Sync — Docker APT configuration
-# Copy to /etc/repository-mirror/docker-apt.conf and adjust values.
-# The service file reads this via EnvironmentFile.
-
-ID=docker-apt
-DISTS=focal,jammy,noble
-SECTIONS=stable
-EXCLUDE=

@@ -16,7 +16,7 @@ func syncWget(cfg Config, p preset.Preset) error {
 	dirExcludes, rejectPatterns := wgetExcludes(p, cfg)
 	cutDirs := helper.CountPathSegments(cfg.MirrorURL)
 
-	buildArgs := func(srcURL string, overrideCutDirs ...int) []string {
+	buildArgs := func(srcURL, destDir string, overrideCutDirs ...int) []string {
 		cd := cutDirs
 		if len(overrideCutDirs) > 0 {
 			cd = overrideCutDirs[0]
@@ -25,7 +25,7 @@ func syncWget(cfg Config, p preset.Preset) error {
 			"--mirror", "--no-parent", "-nH",
 			"--execute", "robots=off",
 			fmt.Sprintf("--cut-dirs=%d", cd),
-			"-P", cfg.DestinationDir, srcURL,
+			"-P", destDir, srcURL,
 		}
 		if cfg.Progress {
 			args = append(args, "--progress=dot:giga")
@@ -83,11 +83,11 @@ func syncWget(cfg Config, p preset.Preset) error {
 						}
 						srcURL += "/"
 					}
-					cd := cutDirs
-					if !hasDistMap {
-						cd = 0
-					}
-					args := buildArgs(srcURL, cd)
+				cd := cutDirs
+				if !hasDistMap {
+					cd = 0
+				}
+				args := buildArgs(srcURL, cfg.DestinationDir, cd)
 
 					if cfg.DryRun {
 						fmt.Printf("wget %s\n", strings.Join(args, " "))
@@ -108,7 +108,7 @@ func syncWget(cfg Config, p preset.Preset) error {
 			return nil
 		}
 		srcURL := mirrorURL + "/"
-		args := buildArgs(srcURL)
+		args := buildArgs(srcURL, cfg.DestinationDir)
 
 		if cfg.DryRun {
 			fmt.Printf("wget %s\n", strings.Join(args, " "))
@@ -154,19 +154,25 @@ func syncWget(cfg Config, p preset.Preset) error {
 				}
 
 				srcURL := fmt.Sprintf("%s/%s", mirrorURL, strings.TrimLeft(path, "/"))
-				args := buildArgs(srcURL)
+
+				cd := cutDirs + p.ExtraCutDirs
+				destDir := cfg.DestinationDir
+				if p.ExtraCutDirs > 0 {
+					destDir = cfg.DestinationDir + "/" + dist
+				}
+				args := buildArgs(srcURL, destDir, cd)
 
 				if cfg.DryRun {
 					fmt.Printf("wget %s\n", strings.Join(args, " "))
 					continue
 				}
-				if err := os.MkdirAll(cfg.DestinationDir, 0755); err != nil {
-					return fmt.Errorf("creating destination directory %s: %w", cfg.DestinationDir, err)
+				if err := os.MkdirAll(destDir, 0755); err != nil {
+					return fmt.Errorf("creating destination directory %s: %w", destDir, err)
 				}
 				cmd := exec.Command("wget", args...)
 				cmd.Stdout = os.Stdout
 				cmd.Stderr = os.Stderr
-				fmt.Printf("Syncing from %s to %s\n", srcURL, cfg.DestinationDir)
+				fmt.Printf("Syncing from %s to %s\n", srcURL, destDir)
 				if err := cmd.Run(); err != nil {
 					return fmt.Errorf("wget failed: %w", err)
 				}

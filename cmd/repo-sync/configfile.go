@@ -60,6 +60,7 @@ func parseConfigFile(path string) (sync.Config, error) {
 		Architectures:  vars["ARCHITECTURES"],
 		Dists:          vars["DISTS"],
 		Keyring:        vars["KEYRING"],
+		SyncType:       vars["SYNC"],
 	}
 
 	if syncStr := vars["SYNC"]; syncStr == "false" || syncStr == "no" || syncStr == "0" {

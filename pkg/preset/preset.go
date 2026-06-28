@@ -10,12 +10,13 @@ type Preset struct {
 	Dists         string
 	Format        string
 	SyncType      string
-	RsyncPath     string
-	Flat          bool
-	Exclude       string
-	GPGKeyURL     string
-	GPGKeyIDs     []string
-	DistMap       map[string]string
+	RsyncPath      string
+	Flat           bool
+	Exclude        string
+	GPGKeyURL      string
+	GPGKeyIDs      []string
+	DistMap        map[string]string
+	ExtraCutDirs   int
 }
 
 func (p Preset) ExpandDistURL(dist string) string {
@@ -60,13 +61,14 @@ var Presets = map[string]Preset{
 	},
 	"epel": {
 		Dest:          "/var/cache/packagesign/yum/epel",
-		MirrorURL:     "rsync://dl.fedoraproject.org/fedora-epel",
+		MirrorURL:     "https://dl.fedoraproject.org/pub/epel",
 		Sections:      "",
 		Architectures: "x86_64",
 		Dists:         "8,9,10",
 		Format:        "rpm",
-		SyncType:      "rsync",
+		SyncType:      "wget",
 		RsyncPath:     "{dist}/Everything/{arch}/",
+		ExtraCutDirs:  2,
 	},
 	"jenkins": {
 		Dest:      "/var/cache/packagesign/jenkins",

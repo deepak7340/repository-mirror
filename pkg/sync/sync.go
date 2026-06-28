@@ -24,6 +24,7 @@ type Config struct {
 	RsyncOptions   string
 	Timeout        string
 	Keyring        string
+	SyncType       string
 }
 
 func wgetExcludes(p preset.Preset, cfg Config) (dirExcludes, rejectPatterns []string) {
@@ -54,7 +55,18 @@ func wgetExcludes(p preset.Preset, cfg Config) (dirExcludes, rejectPatterns []st
 func Run(cfg Config) error {
 	p, ok := preset.Presets[cfg.Identifier]
 	if !ok {
-		return fmt.Errorf("unknown identifier: %s", cfg.Identifier)
+		if cfg.SyncType == "" {
+			return fmt.Errorf("unknown identifier: %s", cfg.Identifier)
+		}
+		p = preset.Preset{
+			Dest:          cfg.DestinationDir,
+			MirrorURL:     cfg.MirrorURL,
+			Sections:      cfg.Sections,
+			Architectures: cfg.Architectures,
+			Dists:         cfg.Dists,
+			SyncType:      cfg.SyncType,
+			Exclude:       cfg.Exclude,
+		}
 	}
 
 	if cfg.DestinationDir == "" {
