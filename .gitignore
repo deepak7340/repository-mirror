@@ -1,3 +1,4 @@
 repository_mirror
 *.deb
 *.rpm
+dist/

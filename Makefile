@@ -1,20 +1,24 @@
 PACKAGE_NAME = repository-mirror
-VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null | sed 's/^v//')
+VERSION ?= 1
 
 .PHONY: all build packages deb rpm dep clean test format vet lint
 
-all: build
+all: packages
 
 build:
 	CGO_ENABLED=0 go build -v -ldflags="-s -w" -o repository_mirror ./cmd/repo-sync
 
-packages: build
+dist:
+	mkdir -p dist
+
+packages: build dist
 	fpm -s dir -t deb \
 		-n $(PACKAGE_NAME) \
 		-v $(VERSION) \
 		-a amd64 \
 		--prefix /usr/local/bin \
 		--description "Repository sync tool for apt/rpm mirrors" \
+		--package dist/ \
 		repository_mirror=/usr/local/bin/repository_mirror
 	fpm -s dir -t rpm \
 		-n $(PACKAGE_NAME) \
@@ -22,24 +26,27 @@ packages: build
 		-a x86_64 \
 		--prefix /usr/local/bin \
 		--description "Repository sync tool for apt/rpm mirrors" \
+		--package dist/ \
 		repository_mirror=/usr/local/bin/repository_mirror
 
-deb: build
+deb: build dist
 	fpm -s dir -t deb \
 		-n $(PACKAGE_NAME) \
 		-v $(VERSION) \
 		-a amd64 \
 		--prefix /usr/local/bin \
 		--description "Repository sync tool for apt/rpm mirrors" \
+		--package dist/ \
 		repository_mirror=/usr/local/bin/repository_mirror
 
-rpm: build
+rpm: build dist
 	fpm -s dir -t rpm \
 		-n $(PACKAGE_NAME) \
 		-v $(VERSION) \
 		-a x86_64 \
 		--prefix /usr/local/bin \
 		--description "Repository sync tool for apt/rpm mirrors" \
+		--package dist/ \
 		repository_mirror=/usr/local/bin/repository_mirror
 
 lint:
@@ -59,4 +66,4 @@ dep:
 
 clean:
 	@go clean
-	rm -f repository_mirror *.deb *.rpm
+	rm -rf repository_mirror dist/

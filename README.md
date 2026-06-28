@@ -70,10 +70,11 @@ Array variables (e.g. `SECTIONS=(main,universe)`) are supported with comma or wh
 ## Building
 
 ```bash
-make build          # build binary
-make deb            # build .deb package
-make rpm            # build .rpm package
-make packages       # build both .deb and .rpm
+make                # build binary + .deb + .rpm (default)
+make build          # build binary only
+make deb            # build .deb package in dist/
+make rpm            # build .rpm package in dist/
+make packages       # build both .deb and .rpm in dist/
 ```
 
 ## Packages
