@@ -16,15 +16,48 @@ jobs:
 
       - name: Build
         run: |
-          set -eux
-          make build
+          go build -o repository_mirror ./cmd/repo-sync
           VERSION="${GITHUB_REF_NAME#v}"
           mkdir -p dist
           cp repository_mirror dist/
-          dpkg-deb --build <(echo test) /dev/null 2>&1 || true
-          echo "Build OK"
+
+      - name: Package
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Building deb for ${VERSION}"
+          PKG_ROOT="$(mktemp -d)"
+          mkdir -p "${PKG_ROOT}/usr/local/bin"
+          cp repository_mirror "${PKG_ROOT}/usr/local/bin/"
+          mkdir -p "${PKG_ROOT}/DEBIAN"
+          cat > "${PKG_ROOT}/DEBIAN/control" <<EOF
+Package: repository-mirror
+Version: ${VERSION}
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Deepak Tiwari <deepak@obmondo.com>
+Description: Repository sync tool for apt/rpm mirrors
+EOF
+          dpkg-deb --build "${PKG_ROOT}" "dist/repository-mirror_${VERSION}_amd64.deb"
+
+      - name: Package RPM
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Building rpm for ${VERSION}"
+          sudo gem install fpm --no-document
+          fpm -s dir -t rpm \
+            -n repository-mirror \
+            -v "${VERSION}" \
+            -a x86_64 \
+            --prefix /usr/local/bin \
+            --description "Repository sync tool for apt/rpm mirrors" \
+            --package dist/ \
+            repository_mirror=/usr/local/bin/repository_mirror
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/repository_mirror
+          files: |
+            dist/repository_mirror
+            dist/repository-mirror_*.deb
+            dist/repository-mirror-*.rpm
