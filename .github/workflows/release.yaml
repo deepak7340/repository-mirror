@@ -15,8 +15,15 @@ jobs:
         with:
           go-version: '1.23'
 
+      - name: Install fpm
+        run: gem install fpm
+
       - name: Build packages
-        run: make
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION="${VERSION#v}"
+          make
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
