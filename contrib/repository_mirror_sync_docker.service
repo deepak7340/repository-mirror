@@ -1,0 +1,13 @@
+[Unit]
+Description=Repository Mirror Sync Docker
+Documentation=https://gitea.obmondo.com/Obmondo/repository-mirror
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/repository-mirror/docker-apt.conf
+ExecStart=/usr/local/bin/repository_mirror --id ${ID} --dists ${DISTS} --sections ${SECTIONS} --exclude ${EXCLUDE}
+
+[Install]
+WantedBy=multi-user.target
