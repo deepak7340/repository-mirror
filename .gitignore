@@ -1,4 +1,3 @@
-repository_mirror
-*.deb
-*.rpm
-dist/
+/repository_mirror
+/*.deb
+/*.rpm

@@ -1,5 +1,5 @@
 PACKAGE_NAME = repository-mirror
-VERSION ?= 1
+VERSION ?= 1.0.0
 
 .PHONY: all build packages deb rpm dep clean test format vet lint
 
