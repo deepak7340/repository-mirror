@@ -29,15 +29,15 @@ jobs:
           mkdir -p "${PKG_ROOT}/usr/local/bin"
           cp repository_mirror "${PKG_ROOT}/usr/local/bin/"
           mkdir -p "${PKG_ROOT}/DEBIAN"
-          cat > "${PKG_ROOT}/DEBIAN/control" <<EOF
-Package: repository-mirror
-Version: ${VERSION}
-Section: utils
-Priority: optional
-Architecture: amd64
-Maintainer: Deepak Tiwari <deepak@obmondo.com>
-Description: Repository sync tool for apt/rpm mirrors
-EOF
+          {
+            echo "Package: repository-mirror"
+            echo "Version: ${VERSION}"
+            echo "Section: utils"
+            echo "Priority: optional"
+            echo "Architecture: amd64"
+            echo "Maintainer: Deepak Tiwari <deepak@obmondo.com>"
+            echo "Description: Repository sync tool for apt/rpm mirrors"
+          } > "${PKG_ROOT}/DEBIAN/control"
           dpkg-deb --build "${PKG_ROOT}" "dist/repository-mirror_${VERSION}_amd64.deb"
 
       - name: Package RPM
