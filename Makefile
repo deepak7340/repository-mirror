@@ -1,4 +1,4 @@
-PACKAGE_NAME = obmondo-repository-mirror
+PACKAGE_NAME = repository-mirror
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null | sed 's/^v//')
 
 .PHONY: all build packages deb rpm dep clean test format vet lint

@@ -65,4 +65,4 @@ make packages       # build both .deb and .rpm
 
 ## Packages
 
-Binary package name: `obmondo-repository-mirror`
+Binary package name: `repository-mirror`
